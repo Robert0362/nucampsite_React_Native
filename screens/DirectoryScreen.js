@@ -1,20 +1,34 @@
-import { useSelector } from 'react-redux';
-import { FlatList, Text } from 'react-native';
+import { FlatList, Text, View } from 'react-native';
 import { Tile } from 'react-native-elements';
+import { useSelector } from 'react-redux';
 import { baseUrl } from '../shared/baseUrl';
-
+import Loading from '../components/LoadingComponent';
 
 const DirectoryScreen = ({ navigation }) => {
     const campsites = useSelector((state) => state.campsites);
+
+    if (campsites.isLoading) {
+        return <Loading />;
+    }
+    if (campsites.errMess) {
+        return (
+            <View>
+                <Text>{campsites.errMess}</Text>
+            </View>
+        );
+    }
+
     const renderDirectoryItem = ({ item: campsite }) => {
         return (
-            <Tile 
-                title = {campsite.name}
+            <Tile
+                title={campsite.name}
                 caption={campsite.description}
                 featured
-                onPress={() => navigation.navigate('CampsiteInfo', {campsite})}
+                onPress={() =>
+                    navigation.navigate('CampsiteInfo', { campsite })
+                }
                 imageSrc={{ uri: baseUrl + campsite.image }}
-            />  
+            />
         );
     };
     return (
