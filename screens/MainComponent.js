@@ -23,7 +23,8 @@ import { fetchComments } from '../features/comments/commentsSlice';
 import FavoritesScreen from './FavoritesScreen';
 import LoginScreen from './LoginScreen';
 import { getFocusedRouteNameFromRoute } from '@react-navigation/core';
-import NetInfo from '@react-native-community/netinfo'
+import NetInfo from '@react-native-community/netinfo';
+import * as MediaLibrary from 'expo-media-library';
 
 
 const Drawer = createDrawerNavigator();
@@ -231,23 +232,35 @@ const Main = () => {
         dispatch(fetchComments());
     }, [dispatch]);
 
-    useEffect(() => {
-        NetInfo.fetch().then((connectionInfo) =>{
+    const showNetInfo = async () => {
+       const connectionInfo = await NetInfo.fetch();
             Platform.OS === 'ios'
                 ? Alert.alert('Initial Network Connectivity Type: ', connectionInfo.type)
                 : ToastAndroid.show(
                     'Initial Network Connectivity Type: ' + connectionInfo.type, ToastAndroid.LONG
                 );
-        });
-
         const unsubscribeNetInfo = NetInfo.addEventListener(
             (connectionInfo) => {
                 handleConnectivityChange(connectionInfo);
             }
         );
-
         return unsubscribeNetInfo;
-    },[]);
+    };
+    
+
+    useEffect(() => {
+        useEffect(() => {
+            showNetInfo();
+            
+            const unsubscribeNetInfo = NetInfo.addEventListener(
+            (connectionInfo) => {
+            handleConnectivityChange(connectionInfo);
+            }
+            );
+            
+            return unsubscribeNetInfo;
+            }, []);
+    });
 
     const handleConnectivityChange = (connectionInfo) => {
         let connectionMsg = 'You are now connected to an active network.'
